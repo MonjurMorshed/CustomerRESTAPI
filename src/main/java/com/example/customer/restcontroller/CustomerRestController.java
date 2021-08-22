@@ -3,6 +3,8 @@ package com.example.customer.restcontroller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +19,7 @@ import com.example.customer.exception.CustomerNotFoundException;
 import com.example.customer.service.CustomerService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/customers")
 public class CustomerRestController {
 
 	private CustomerService customerService;
@@ -27,40 +29,40 @@ public class CustomerRestController {
 		this.customerService = thecustomerService;
 	} 
 	
-	@GetMapping("/customers")
+	@GetMapping
 	public List<Customer> findAll(){
 		return this.customerService.findAllCustomers();
 	}
 	
-	@GetMapping("/customers/{customerId}")
+	@GetMapping("/{customerId}")
 	public Customer getCustomerById(@PathVariable int customerId) {
-		Customer cust = this.customerService.findById(customerId);
-		if(cust == null) {
+		Customer customer = this.customerService.findById(customerId);
+		if(customer == null) {
 			throw new CustomerNotFoundException("Customer id is not found");
 		}
-		return cust;
+		return customer;
 	}
 	
-	@PostMapping("/customers")
+	@PostMapping
 	public Customer addCustomer(@RequestBody Customer customer) {
 		customer.setId(0);
 		this.customerService.saveCustomer(customer);
 		return customer;
 	}
 	
-	@PutMapping("/customers")
+	@PutMapping
 	public Customer updateCustomer(@RequestBody Customer customer) {
 		this.customerService.saveCustomer(customer);
 		return customer;
 	}
 	
-	@DeleteMapping("/customers/{customerId}")
-	public String deleteCustomerById(@PathVariable int customerId) {
+	@DeleteMapping("/{customerId}")
+	public ResponseEntity deleteCustomerById(@PathVariable int customerId) {
 		Customer cust = this.customerService.findById(customerId);
 		if(cust == null) {
 			throw new CustomerNotFoundException("Customer has not been found by id = "+customerId);
 		}
 		this.customerService.deleteById(customerId);
-		return "Deleted customer by id = "+customerId;
+		return new ResponseEntity(HttpStatus.OK);
 	}
 }
